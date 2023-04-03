@@ -14,9 +14,9 @@ def get_trace(data):
     return path
 
 
-# returns x position given points from the equation and time 0 <= t <= 1
+# returns x position on a segment given points from the equation and time 0 <= t <= 1
 # corner segments are broken into 2 parts
-# x0, x1
+# x0, x1 and
 # x1, x2
 # if working on the x1, x2 part use those as parameters for x0, x1 respectively
 def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
@@ -28,7 +28,7 @@ def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
 
 # returns y position on a segment given points from the equation and time 0 <= t <= 1
 # corner segments are broken into 2 parts
-# y0, y1
+# y0, y1 and
 # y1, y2
 # if working on the y1, y2 part use those as parameters for y0, y1 respectively
 def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
@@ -39,6 +39,7 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
 
 
 # returns Bézier curves from the image path as an array of strings
+# best for graphing
 def get_latex(path):
     latex = []
     for curve in path:
@@ -61,7 +62,8 @@ def get_latex(path):
     return latex
 
 
-# Prints start, corner(s), and endpoints
+# returns start, corner(s), and endpoints as an array of strings
+# best for reading
 def get_points(path):
     point_strings = []
     for curve in path:
@@ -95,16 +97,21 @@ if __name__ == "__main__":
          [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]])
     # ______________________________________________________________________________________________
 
+    # TEST METHODS _________________________________________________________________________________
     # get "svg"
+    # change test image here
     image_path = get_trace(image1)
+
     # print points on each curve
     points = get_points(image_path)
     for point in points:
         print(point)
-    # print equations for graphing
+
+    # print equations
     equations = get_latex(image_path)
     for equation in equations:
         print(equation)
+
     # testing position functions
     for image_curve in image_path:
         istart = image_curve.start_point
@@ -126,3 +133,4 @@ if __name__ == "__main__":
                 print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
                 print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
             istart = image_segment.end_point
+    # ______________________________________________________________________________________________
