@@ -14,6 +14,30 @@ def get_trace(data):
     return path
 
 
+# returns x position given points from the equation and time 0 <= t <= 1
+# corner segments are broken into 2 parts
+# x0, x1
+# x1, x2
+# if working on the x1, x2 part use those as parameters for x0, x1 respectively
+def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
+    if is_corner:
+        return (1-t)*x0+t*x1
+    else:
+        return (1-t)*((1-t)*((1-t)*x0+t*x1) + t*((1-t)*x1+t*x2)) + t*((1-t)*((1-t)*x1+t*x2) + t*((1-t)*x2+t*x3))
+
+
+# returns y position on a segment given points from the equation and time 0 <= t <= 1
+# corner segments are broken into 2 parts
+# y0, y1
+# y1, y2
+# if working on the y1, y2 part use those as parameters for y0, y1 respectively
+def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
+    if is_corner:
+        return (1-t)*y0+t*y1
+    else:
+        return (1-t)*((1-t)*((1-t)*y0+t*y1) + t*((1-t)*y1+t*y2)) + t*((1-t)*((1-t)*y1+t*y2) + t*((1-t)*y2+t*y3))
+
+
 # returns Bézier curves from the image path as an array of strings
 def get_latex(path):
     latex = []
@@ -72,7 +96,7 @@ if __name__ == "__main__":
     # ______________________________________________________________________________________________
 
     # get "svg"
-    image_path = get_trace(image4)
+    image_path = get_trace(image1)
     # print points on each curve
     points = get_points(image_path)
     for point in points:
@@ -81,3 +105,24 @@ if __name__ == "__main__":
     equations = get_latex(image_path)
     for equation in equations:
         print(equation)
+    # testing position functions
+    for image_curve in image_path:
+        istart = image_curve.start_point
+        for image_segment in image_curve:
+            ix0, iy0 = istart
+            if image_segment.is_corner:
+                ix1, iy1 = image_segment.c
+                ix2, iy2 = image_segment.end_point
+                print("first part of corner")
+                print(get_x_position(True, .5, ix0, ix1))
+                print(get_y_position(True, .5, iy0, iy1))
+                print("second part of corner")
+                print(get_x_position(True, .5, ix1, ix2))
+                print(get_y_position(True, .5, iy1, iy2))
+            else:
+                ix1, iy1 = image_segment.c1
+                ix2, iy2 = image_segment.c2
+                ix3, iy3 = image_segment.end_point
+                print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
+                print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
+            istart = image_segment.end_point
