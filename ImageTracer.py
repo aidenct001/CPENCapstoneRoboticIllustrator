@@ -38,6 +38,30 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
         return (1-t)*((1-t)*((1-t)*y0+t*y1) + t*((1-t)*y1+t*y2)) + t*((1-t)*((1-t)*y1+t*y2) + t*((1-t)*y2+t*y3))
 
 
+# returns x velocity on a segment given points from the equation and time 0 <= t <= 1
+# corner segments are broken into 2 parts
+# x0, x1 and
+# x1, x2
+# if working on the x1, x2 part use those as parameters for x0, x1 respectively
+def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
+    if is_corner:
+        return -x0+x1
+    else:
+        return 0
+
+
+# returns y velocity on a segment given points from the equation and time 0 <= t <= 1
+# corner segments are broken into 2 parts
+# y0, y1 and
+# y1, y2
+# if working on the y1, y2 part use those as parameters for y0, y1 respectively
+def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
+    if is_corner:
+        return -y0+y1
+    else:
+        return 0
+
+
 # returns Bézier curves from the image path as an array of strings
 # best for graphing
 def get_latex(path):
@@ -122,10 +146,14 @@ if __name__ == "__main__":
                 ix2, iy2 = image_segment.end_point
                 print("first part of corner")
                 print(get_x_position(True, .5, ix0, ix1))
+                print(get_x_velocity(True, .5, ix0, ix1))
                 print(get_y_position(True, .5, iy0, iy1))
+                print(get_y_velocity(True, .5, iy0, iy1))
                 print("second part of corner")
                 print(get_x_position(True, .5, ix1, ix2))
+                print(get_x_velocity(True, .5, ix1, ix2))
                 print(get_y_position(True, .5, iy1, iy2))
+                print(get_y_velocity(True, .5, iy1, iy2))
             else:
                 ix1, iy1 = image_segment.c1
                 ix2, iy2 = image_segment.c2
