@@ -3,11 +3,8 @@ import potrace
 
 
 def get_trace(data):
-    # not sure what this is, probs for cv2 implementation
-    # for i in range(len(data)):
-    #     data[i][data[i] > 1] = 1
     bmp = potrace.Bitmap(data)
-    path = bmp.trace()  # 2, potrace.TURNPOLICY_MINORITY, 1.0, 1, .5
+    path = bmp.trace()
     return path
 
 
