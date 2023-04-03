@@ -1,5 +1,7 @@
 import numpy as np
 import potrace
+
+
 # variable terminology
 # data = bitmap of pixels from an image
 # path = all svg data from an image
@@ -20,10 +22,13 @@ def get_trace(data):
 # x1, x2
 # if working on the x1, x2 part use those as parameters for x0, x1 respectively
 def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
+    if t < 0 or t > 1:
+        raise ValueError("t value not between 0 and 1")
     if is_corner:
-        return (1-t)*x0+t*x1
+        return (1 - t) * x0 + t * x1
     else:
-        return (1-t)*((1-t)*((1-t)*x0+t*x1) + t*((1-t)*x1+t*x2)) + t*((1-t)*((1-t)*x1+t*x2) + t*((1-t)*x2+t*x3))
+        return (1 - t) * ((1 - t) * ((1 - t) * x0 + t * x1) + t * ((1 - t) * x1 + t * x2)) + t * (
+                    (1 - t) * ((1 - t) * x1 + t * x2) + t * ((1 - t) * x2 + t * x3))
 
 
 # returns y position on a segment given points from the equation and time 0 <= t <= 1
@@ -32,10 +37,13 @@ def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
 # y1, y2
 # if working on the y1, y2 part use those as parameters for y0, y1 respectively
 def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
+    if t < 0 or t > 1:
+        raise ValueError("t value not between 0 and 1")
     if is_corner:
-        return (1-t)*y0+t*y1
+        return (1 - t) * y0 + t * y1
     else:
-        return (1-t)*((1-t)*((1-t)*y0+t*y1) + t*((1-t)*y1+t*y2)) + t*((1-t)*((1-t)*y1+t*y2) + t*((1-t)*y2+t*y3))
+        return (1 - t) * ((1 - t) * ((1 - t) * y0 + t * y1) + t * ((1 - t) * y1 + t * y2)) + t * (
+                    (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
 
 
 # returns x velocity on a segment given points from the equation and time 0 <= t <= 1
@@ -44,8 +52,10 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
 # x1, x2
 # if working on the x1, x2 part use those as parameters for x0, x1 respectively
 def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
+    if t < 0 or t > 1:
+        raise ValueError("t value not between 0 and 1")
     if is_corner:
-        return -x0+x1
+        return -x0 + x1
     else:
         return 0
 
@@ -56,8 +66,10 @@ def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
 # y1, y2
 # if working on the y1, y2 part use those as parameters for y0, y1 respectively
 def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
+    if t < 0 or t > 1:
+        raise ValueError("t value not between 0 and 1")
     if is_corner:
-        return -y0+y1
+        return -y0 + y1
     else:
         return 0
 
