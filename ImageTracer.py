@@ -7,6 +7,11 @@ import potrace
 # segment = single line from a curve
 
 
+# returns a numpy array from an image file
+def get_data(file_path):
+    return "todo"
+
+
 # returns a path from a bitmap data
 def get_trace(data):
     bmp = potrace.Bitmap(data)
@@ -63,8 +68,8 @@ def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
         print("Use get_slope for same function")
         return -x0 + x1
     else:
-        print("Unimplemented cause it will likely not give good results")
-        return 0
+        raise Warning("Unimplemented cause it will likely not give good results. Can change later")
+        # return 0
 
 
 # WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
@@ -80,8 +85,8 @@ def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
         print("Use get_slope for same function")
         return -y0 + y1
     else:
-        print("Unimplemented cause it will likely not give good results")
-        return 0
+        raise Warning("Unimplemented cause it will likely not give good results. Can change later")
+        # return 0
 
 
 # returns Bézier curves from the image path as an array of strings
@@ -146,7 +151,7 @@ if __name__ == "__main__":
     # TEST METHODS _________________________________________________________________________________
     # get "svg"
     # change test image here
-    image_path = get_trace(image1)
+    image_path = get_trace(image4)
 
     # print points on each curve
     points = get_points(image_path)
@@ -181,6 +186,7 @@ if __name__ == "__main__":
                 ix2, iy2 = image_segment.c2
                 ix3, iy3 = image_segment.end_point
                 print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
+                # print(get_x_velocity(False, .5, ix0, ix1, ix2, ix3))
                 print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
             istart = image_segment.end_point
     # ______________________________________________________________________________________________
