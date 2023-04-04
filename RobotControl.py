@@ -1,4 +1,12 @@
 import ImageTracer
+current_pos = 0, 0
+
+
+# moves robot to new position from current position
+# returns new position to update current_pos
+def go_to_position(x_cur, y_cur, x_new, y_new):
+    # move position
+    return x_new, y_new
 
 
 # draws every curve in an image
