@@ -1,7 +1,5 @@
 import numpy as np
 import potrace
-
-
 # variable terminology
 # data = bitmap of pixels from an image
 # path = all svg data from an image
@@ -46,6 +44,13 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
                     (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
 
 
+# returns velocity between 2 x or y values
+# intended for velocity in 1 axis
+def get_velocity(p0, p1):
+    return p1-p0
+
+
+# WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
 # returns x velocity on a segment given points from the equation and time 0 <= t <= 1
 # corner segments are broken into 2 parts
 # x0, x1 and
@@ -54,12 +59,15 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
 def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
     if t < 0 or t > 1:
         raise ValueError("t value not between 0 and 1")
-    if is_corner:
+    if is_corner:  # overcomplicates simple function
+        print("Use get_slope for same function")
         return -x0 + x1
     else:
+        print("Unimplemented cause it will likely not give good results")
         return 0
 
 
+# WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
 # returns y velocity on a segment given points from the equation and time 0 <= t <= 1
 # corner segments are broken into 2 parts
 # y0, y1 and
@@ -68,9 +76,11 @@ def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
 def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
     if t < 0 or t > 1:
         raise ValueError("t value not between 0 and 1")
-    if is_corner:
+    if is_corner:  # overcomplicates simple function
+        print("Use get_slope for same function")
         return -y0 + y1
     else:
+        print("Unimplemented cause it will likely not give good results")
         return 0
 
 
