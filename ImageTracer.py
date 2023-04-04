@@ -1,5 +1,7 @@
 import numpy as np
 import potrace
+
+
 # variable terminology
 # data = bitmap of pixels from an image
 # path = all svg data from an image
@@ -31,7 +33,7 @@ def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
         return (1 - t) * x0 + t * x1
     else:
         return (1 - t) * ((1 - t) * ((1 - t) * x0 + t * x1) + t * ((1 - t) * x1 + t * x2)) + t * (
-                    (1 - t) * ((1 - t) * x1 + t * x2) + t * ((1 - t) * x2 + t * x3))
+                (1 - t) * ((1 - t) * x1 + t * x2) + t * ((1 - t) * x2 + t * x3))
 
 
 # returns y position on a segment given points from the equation and time 0 <= t <= 1
@@ -46,13 +48,13 @@ def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
         return (1 - t) * y0 + t * y1
     else:
         return (1 - t) * ((1 - t) * ((1 - t) * y0 + t * y1) + t * ((1 - t) * y1 + t * y2)) + t * (
-                    (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
+                (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
 
 
 # returns velocity between 2 x or y values
 # intended for velocity in 1 axis
 def get_velocity(p0, p1):
-    return p1-p0
+    return p1 - p0
 
 
 # WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
@@ -65,7 +67,7 @@ def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
     if t < 0 or t > 1:
         raise ValueError("t value not between 0 and 1")
     if is_corner:  # overcomplicates simple function
-        print("Use get_slope for same function")
+        print("Use get_velocity for same function")
         return -x0 + x1
     else:
         raise Warning("Unimplemented cause it will likely not give good results. Can change later")
@@ -82,12 +84,14 @@ def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
     if t < 0 or t > 1:
         raise ValueError("t value not between 0 and 1")
     if is_corner:  # overcomplicates simple function
-        print("Use get_slope for same function")
+        print("Use get_velocity for same function")
         return -y0 + y1
     else:
         raise Warning("Unimplemented cause it will likely not give good results. Can change later")
         # return 0
 
+
+# DEBUG METHODS_________________________________________________________________________________________________________
 
 # returns Bézier curves from the image path as an array of strings
 # best for graphing
@@ -127,7 +131,7 @@ def get_points(path):
 
 if __name__ == "__main__":
 
-    # TEST DATA ____________________________________________________________________________________
+    # TEST DATA ________________________________________________________________________________________________________
     # large square filled (16x16)
     image1 = np.zeros((32, 32), np.uint32)
     image1[8:32 - 8, 8:32 - 8] = 1
@@ -146,22 +150,22 @@ if __name__ == "__main__":
         [[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]])
-    # ______________________________________________________________________________________________
+    # __________________________________________________________________________________________________________________
 
-    # TEST METHODS _________________________________________________________________________________
+    # TEST METHODS _____________________________________________________________________________________________________
     # get "svg"
     # change test image here
-    image_path = get_trace(image4)
+    image_path = get_trace(image1)
 
-    # print points on each curve
-    points = get_points(image_path)
-    for point in points:
-        print(point)
+    # # print points on each curve
+    # points = get_points(image_path)
+    # for point in points:
+    #     print(point)
 
-    # print equations
-    equations = get_latex(image_path)
-    for equation in equations:
-        print(equation)
+    # # print equations
+    # equations = get_latex(image_path)
+    # for equation in equations:
+    #     print(equation)
 
     # testing position functions
     for image_curve in image_path:
@@ -173,14 +177,14 @@ if __name__ == "__main__":
                 ix2, iy2 = image_segment.end_point
                 print("first part of corner")
                 print(get_x_position(True, .5, ix0, ix1))
-                print(get_x_velocity(True, .5, ix0, ix1))
+                print(get_velocity(ix0, ix1))
                 print(get_y_position(True, .5, iy0, iy1))
-                print(get_y_velocity(True, .5, iy0, iy1))
+                print(get_velocity(iy0, iy1))
                 print("second part of corner")
                 print(get_x_position(True, .5, ix1, ix2))
-                print(get_x_velocity(True, .5, ix1, ix2))
+                print(get_velocity(ix1, ix2))
                 print(get_y_position(True, .5, iy1, iy2))
-                print(get_y_velocity(True, .5, iy1, iy2))
+                print(get_velocity(iy1, iy2))
             else:
                 ix1, iy1 = image_segment.c1
                 ix2, iy2 = image_segment.c2
@@ -189,4 +193,4 @@ if __name__ == "__main__":
                 # print(get_x_velocity(False, .5, ix0, ix1, ix2, ix3))
                 print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
             istart = image_segment.end_point
-    # ______________________________________________________________________________________________
+    # __________________________________________________________________________________________________________________
