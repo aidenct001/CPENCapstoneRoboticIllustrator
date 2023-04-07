@@ -79,40 +79,6 @@ def get_velocity(p0, p1):
     return p1 - p0
 
 
-# WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
-# returns x velocity on a segment given points from the equation and time 0 <= t <= 1
-# corner segments are broken into 2 parts
-# x0, x1 and
-# x1, x2
-# if working on the x1, x2 part use those as parameters for x0, x1 respectively
-def get_x_velocity(is_corner, t, x0, x1, x2=-1, x3=-1):
-    if t < 0 or t > 1:
-        raise ValueError("t value not between 0 and 1")
-    if is_corner:  # overcomplicates simple function
-        print("Use get_velocity for same function")
-        return -x0 + x1
-    else:
-        raise Warning("Unimplemented cause it will likely not give good results. Can change later")
-        # return 0
-
-
-# WILL UNDER OR OVERESTIMATE SLOPE ON NON-STRAIGHT LINES
-# returns y velocity on a segment given points from the equation and time 0 <= t <= 1
-# corner segments are broken into 2 parts
-# y0, y1 and
-# y1, y2
-# if working on the y1, y2 part use those as parameters for y0, y1 respectively
-def get_y_velocity(is_corner, t, y0, y1, y2=-1, y3=-1):
-    if t < 0 or t > 1:
-        raise ValueError("t value not between 0 and 1")
-    if is_corner:  # overcomplicates simple function
-        print("Use get_velocity for same function")
-        return -y0 + y1
-    else:
-        raise Warning("Unimplemented cause it will likely not give good results. Can change later")
-        # return 0
-
-
 # DEBUG METHODS_________________________________________________________________________________________________________
 
 # returns Bézier curves from the image path as an array of strings
