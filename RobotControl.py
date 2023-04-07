@@ -32,5 +32,10 @@ def draw_curve(curve):
         start = segment.end_point
 
 
+# test function for testing gui
+def draw_image_test(path):
+    print("done")
+
+
 if __name__ == "__main__":
     print("debug todo")
