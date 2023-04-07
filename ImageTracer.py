@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 import potrace
 
 
@@ -9,9 +10,24 @@ import potrace
 # segment = single line from a curve
 
 
-# returns a numpy array from an image file
-def get_data(file_path):
-    return "todo"
+# returns an image object from an image file path
+def get_image(file_path):
+    return Image.open(file_path)
+
+
+# returns a grayscale image
+def grayscale(image):
+    return image.convert('L')
+
+
+# returns a black and white image
+def maximize_contrast(image):
+    return image.point(lambda x: 0 if x < 128 else 255, '1')
+
+
+# returns a numpy array from an image object
+def get_data(image):
+    return np.array(image)
 
 
 # returns a path from a bitmap data
@@ -19,6 +35,12 @@ def get_trace(data):
     bmp = potrace.Bitmap(data)
     path = bmp.trace()
     return path
+
+
+# combines the above functions
+# returns an image path from a file path
+def get_path_from_image(file_path):
+    return get_trace(get_data(maximize_contrast(grayscale(get_image(file_path)))))
 
 
 # returns x position on a segment given points from the equation and time 0 <= t <= 1
@@ -150,47 +172,49 @@ if __name__ == "__main__":
         [[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]])
+    image_file_path = "./testimages/car.png"
     # __________________________________________________________________________________________________________________
 
     # TEST METHODS _____________________________________________________________________________________________________
     # get "svg"
     # change test image here
-    image_path = get_trace(image1)
+    # image_path = get_trace(image1)
+    image_path = get_path_from_image(image_file_path)
 
-    # # print points on each curve
+    # print points on each curve
     # points = get_points(image_path)
     # for point in points:
     #     print(point)
 
     # # print equations
-    # equations = get_latex(image_path)
-    # for equation in equations:
-    #     print(equation)
+    equations = get_latex(image_path)
+    for equation in equations:
+        print(equation)
 
     # testing position functions
-    for image_curve in image_path:
-        istart = image_curve.start_point
-        for image_segment in image_curve:
-            ix0, iy0 = istart
-            if image_segment.is_corner:
-                ix1, iy1 = image_segment.c
-                ix2, iy2 = image_segment.end_point
-                print("first part of corner")
-                print(get_x_position(True, .5, ix0, ix1))
-                print(get_velocity(ix0, ix1))
-                print(get_y_position(True, .5, iy0, iy1))
-                print(get_velocity(iy0, iy1))
-                print("second part of corner")
-                print(get_x_position(True, .5, ix1, ix2))
-                print(get_velocity(ix1, ix2))
-                print(get_y_position(True, .5, iy1, iy2))
-                print(get_velocity(iy1, iy2))
-            else:
-                ix1, iy1 = image_segment.c1
-                ix2, iy2 = image_segment.c2
-                ix3, iy3 = image_segment.end_point
-                print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
-                # print(get_x_velocity(False, .5, ix0, ix1, ix2, ix3))
-                print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
-            istart = image_segment.end_point
+    # for image_curve in image_path:
+    #     istart = image_curve.start_point
+    #     for image_segment in image_curve:
+    #         ix0, iy0 = istart
+    #         if image_segment.is_corner:
+    #             ix1, iy1 = image_segment.c
+    #             ix2, iy2 = image_segment.end_point
+    #             print("first part of corner")
+    #             print(get_x_position(True, .5, ix0, ix1))
+    #             print(get_velocity(ix0, ix1))
+    #             print(get_y_position(True, .5, iy0, iy1))
+    #             print(get_velocity(iy0, iy1))
+    #             print("second part of corner")
+    #             print(get_x_position(True, .5, ix1, ix2))
+    #             print(get_velocity(ix1, ix2))
+    #             print(get_y_position(True, .5, iy1, iy2))
+    #             print(get_velocity(iy1, iy2))
+    #         else:
+    #             ix1, iy1 = image_segment.c1
+    #             ix2, iy2 = image_segment.c2
+    #             ix3, iy3 = image_segment.end_point
+    #             print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
+    #             # print(get_x_velocity(False, .5, ix0, ix1, ix2, ix3))
+    #             print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
+    #         istart = image_segment.end_point
     # __________________________________________________________________________________________________________________

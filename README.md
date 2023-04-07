@@ -10,4 +10,5 @@ Install dependencies
 Install libraries
 
     $ pip install numpy
+    $ pip install pillow
     $ pip install pypotrace
