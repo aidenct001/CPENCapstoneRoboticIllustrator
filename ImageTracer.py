@@ -22,7 +22,7 @@ def grayscale(image):
 
 # returns a black and white image
 def maximize_contrast(image):
-    return image.point(lambda x: 0 if x < 128 else 255, '1')
+    return image.point(lambda x: 0 if x < 128 else 1)
 
 
 # returns a numpy array from an image object
