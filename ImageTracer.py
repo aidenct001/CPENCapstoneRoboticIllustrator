@@ -17,12 +17,16 @@ def get_image(file_path):
 
 # returns a grayscale image
 def grayscale(image):
-    return image.convert('L')
+    temp = image.convert('L')
+    temp.save("./testimages/carg.png")
+    return temp
 
 
 # returns a black and white image
-def maximize_contrast(image):
-    return image.point(lambda x: 0 if x < 128 else 1)
+def maximize_contrast(image, c=128):
+    temp = image.point(lambda x: 0 if x < c else 255)
+    temp.save("./testimages/carb.png")
+    return image.point(lambda x: 0 if x < c else 1)
 
 
 # returns a numpy array from an image object
@@ -152,7 +156,7 @@ if __name__ == "__main__":
     # for point in points:
     #     print(point)
 
-    # # print equations
+    # print equations
     equations = get_latex(image_path)
     for equation in equations:
         print(equation)
@@ -166,21 +170,20 @@ if __name__ == "__main__":
     #             ix1, iy1 = image_segment.c
     #             ix2, iy2 = image_segment.end_point
     #             print("first part of corner")
-    #             print(get_x_position(True, .5, ix0, ix1))
-    #             print(get_velocity(ix0, ix1))
-    #             print(get_y_position(True, .5, iy0, iy1))
-    #             print(get_velocity(iy0, iy1))
+    #             print("x={}".format(get_x_position(True, .5, ix0, ix1)))
+    #             print("x slope={}".format(get_velocity(ix0, ix1)))
+    #             print("y={}".format(get_y_position(True, .5, iy0, iy1)))
+    #             print("y slope={}".format(get_velocity(iy0, iy1)))
     #             print("second part of corner")
-    #             print(get_x_position(True, .5, ix1, ix2))
-    #             print(get_velocity(ix1, ix2))
-    #             print(get_y_position(True, .5, iy1, iy2))
-    #             print(get_velocity(iy1, iy2))
+    #             print("x={}".format(get_x_position(True, .5, ix1, ix2)))
+    #             print("x slope={}".format(get_velocity(ix1, ix2)))
+    #             print("y={}".format(get_y_position(True, .5, iy1, iy2)))
+    #             print("y slope={}".format(get_velocity(iy1, iy2)))
     #         else:
     #             ix1, iy1 = image_segment.c1
     #             ix2, iy2 = image_segment.c2
     #             ix3, iy3 = image_segment.end_point
     #             print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
-    #             # print(get_x_velocity(False, .5, ix0, ix1, ix2, ix3))
     #             print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
     #         istart = image_segment.end_point
     # __________________________________________________________________________________________________________________
