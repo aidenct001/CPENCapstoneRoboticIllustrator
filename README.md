@@ -12,3 +12,10 @@ Install libraries
     $ pip install numpy
     $ pip install pillow
     $ pip install pypotrace
+
+### Windows
+Install libraries
+
+    $ pip install numpy
+    $ pip install pillow
+    $ pip install potracer

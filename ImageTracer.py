@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
 import potrace
+import os
 
 
 # variable terminology
@@ -26,7 +27,8 @@ def grayscale(image):
 def maximize_contrast(image, c=128):
     temp = image.point(lambda x: 0 if x < c else 255)
     temp.save("./testimages/carb.png")
-    return image.point(lambda x: 0 if x < c else 1)
+    # os check windows needs 255 and linux needs 1 for their respective potrace implementations
+    return image.point(lambda x: 0 if x < c else (lambda o: 255 if o == "nt" else 1)(os.name))
 
 
 # returns a numpy array from an image object
@@ -47,40 +49,12 @@ def get_path_from_image(file_path):
     return get_trace(get_data(maximize_contrast(grayscale(get_image(file_path)))))
 
 
-# returns x position on a segment given points from the equation and time 0 <= t <= 1
-# corner segments are broken into 2 parts
-# x0, x1 and
-# x1, x2
-# if working on the x1, x2 part use those as parameters for x0, x1 respectively
-def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
-    if t < 0 or t > 1:
-        raise ValueError("t value not between 0 and 1")
-    if is_corner:
-        return (1 - t) * x0 + t * x1
+# returns tuple data if corner is a point object
+def get_tuple(corner):
+    if isinstance(corner, tuple):
+        return corner
     else:
-        return (1 - t) * ((1 - t) * ((1 - t) * x0 + t * x1) + t * ((1 - t) * x1 + t * x2)) + t * (
-                (1 - t) * ((1 - t) * x1 + t * x2) + t * ((1 - t) * x2 + t * x3))
-
-
-# returns y position on a segment given points from the equation and time 0 <= t <= 1
-# corner segments are broken into 2 parts
-# y0, y1 and
-# y1, y2
-# if working on the y1, y2 part use those as parameters for y0, y1 respectively
-def get_y_position(is_corner, t, y0, y1, y2=-1, y3=-1):
-    if t < 0 or t > 1:
-        raise ValueError("t value not between 0 and 1")
-    if is_corner:
-        return (1 - t) * y0 + t * y1
-    else:
-        return (1 - t) * ((1 - t) * ((1 - t) * y0 + t * y1) + t * ((1 - t) * y1 + t * y2)) + t * (
-                (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
-
-
-# returns velocity between 2 x or y values
-# intended for velocity in 1 axis
-def get_velocity(p0, p1):
-    return p1 - p0
+        return corner.x, corner.y
 
 
 # DEBUG METHODS_________________________________________________________________________________________________________
@@ -92,20 +66,20 @@ def get_latex(path):
     for curve in path:
         start = curve.start_point
         for segment in curve:
-            x0, y0 = start
+            x0, y0 = get_tuple(start)
             if segment.is_corner:
-                x1, y1 = segment.c
-                x2, y2 = segment.end_point
+                x1, y1 = get_tuple(segment.c)
+                x2, y2 = get_tuple(segment.end_point)
                 latex.append('((1-t){}+t{},(1-t){}+t{})'.format(x0, x1, y0, y1))
                 latex.append('((1-t){}+t{},(1-t){}+t{})'.format(x1, x2, y1, y2))
             else:
-                x1, y1 = segment.c1
-                x2, y2 = segment.c2
-                x3, y3 = segment.end_point
+                x1, y1 = get_tuple(segment.c1)
+                x2, y2 = get_tuple(segment.c2)
+                x3, y3 = get_tuple(segment.end_point)
                 latex.append('((1-t)((1-t)((1-t){}+t{})+t((1-t){}+t{}))+t((1-t)((1-t){}+t{})+t((1-t){}+t{})),\
                 (1-t)((1-t)((1-t){}+t{})+t((1-t){}+t{}))+t((1-t)((1-t){}+t{})+t((1-t){}+t{})))'.format
                              (x0, x1, x1, x2, x1, x2, x2, x3, y0, y1, y1, y2, y1, y2, y2, y3))
-            start = segment.end_point
+            start = get_tuple(segment.end_point)
     return latex
 
 
@@ -158,32 +132,7 @@ if __name__ == "__main__":
 
     # print equations
     equations = get_latex(image_path)
-    for equation in equations:
-        print(equation)
-
-    # testing position functions
-    # for image_curve in image_path:
-    #     istart = image_curve.start_point
-    #     for image_segment in image_curve:
-    #         ix0, iy0 = istart
-    #         if image_segment.is_corner:
-    #             ix1, iy1 = image_segment.c
-    #             ix2, iy2 = image_segment.end_point
-    #             print("first part of corner")
-    #             print("x={}".format(get_x_position(True, .5, ix0, ix1)))
-    #             print("x slope={}".format(get_velocity(ix0, ix1)))
-    #             print("y={}".format(get_y_position(True, .5, iy0, iy1)))
-    #             print("y slope={}".format(get_velocity(iy0, iy1)))
-    #             print("second part of corner")
-    #             print("x={}".format(get_x_position(True, .5, ix1, ix2)))
-    #             print("x slope={}".format(get_velocity(ix1, ix2)))
-    #             print("y={}".format(get_y_position(True, .5, iy1, iy2)))
-    #             print("y slope={}".format(get_velocity(iy1, iy2)))
-    #         else:
-    #             ix1, iy1 = image_segment.c1
-    #             ix2, iy2 = image_segment.c2
-    #             ix3, iy3 = image_segment.end_point
-    #             print(get_x_position(False, .5, ix0, ix1, ix2, ix3))
-    #             print(get_y_position(False, .5, iy0, iy1, iy2, iy3))
-    #         istart = image_segment.end_point
+    with open('equations.txt', 'w') as f:
+        for equation in equations:
+            f.write('{}\n'.format(equation))
     # __________________________________________________________________________________________________________________
