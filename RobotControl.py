@@ -38,7 +38,7 @@ def go_to_position(x_cur, y_cur, x_new, y_new):
 # x0, x1 and
 # x1, x2
 # if working on the x1, x2 part use those as parameters for x0, x1 respectively
-def get_x_position(is_corner, t, x0, x1, x2=-1, x3=-1):
+def get_x_position(t, x0, x1, x2=-1, x3=-1):
     if t < 0 or t > 1:
         raise ValueError("t value not between 0 and 1")
     if(x2==-1 and x3==-1):
