@@ -1,5 +1,6 @@
 import ImageTracer
-current_pos = 0, 0
+current_x_pos = 0
+current_y_pos = 0
 
 
 # draws every curve in an image
