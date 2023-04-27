@@ -5,48 +5,45 @@ import os
 
 
 # variable terminology
-# data = bitmap of pixels from an image
+# image: image object containing png or jpeg
+# array = bitmap of pixels from an image
 # path = all svg data from an image
 # curve = single full shape from a path
 # segment = single line from a curve
 
 
 # returns an image object from an image file path
-def get_image(file_path):
-    return Image.open(file_path)
+def get_image(image_file_path):
+    return Image.open(image_file_path)
 
 
 # returns a grayscale image
-def grayscale(image):
+def grayscale(image, image_file_path_gray=None):
     temp = image.convert('L')
-    temp.save("./testimages/carg.png")
+    if image_file_path_gray is not None: 
+        temp.save(image_file_path_gray)
     return temp
 
 
 # returns a black and white image
-def maximize_contrast(image, c=128):
-    temp = image.point(lambda x: 0 if x < c else 255)
-    temp.save("./testimages/carb.png")
+def maximize_contrast(image, contrast_amount=128, image_file_path_black=None):
+    temp = image.point(lambda x: 0 if x < contrast_amount else 255)
+    if image_file_path_black is not None: 
+        temp.save(image_file_path_black)
     # os check windows needs 255 and linux needs 1 for their respective potrace implementations
-    return image.point(lambda x: 0 if x < c else (lambda o: 255 if o == "nt" else 1)(os.name))
+    return image.point(lambda x: 0 if x < contrast_amount else (lambda osname: 255 if osname == "nt" else 1)(os.name))
 
 
 # returns a numpy array from an image object
-def get_data(image):
+def get_array(image):
     return np.array(image)
 
 
 # returns a path from a bitmap data
-def get_trace(data):
-    bmp = potrace.Bitmap(data)
+def get_trace(array):
+    bmp = potrace.Bitmap(array)
     path = bmp.trace()
     return path
-
-
-# combines the above functions
-# returns an image path from a file path
-def get_path_from_image(file_path):
-    return get_trace(get_data(maximize_contrast(grayscale(get_image(file_path)))))
 
 
 # returns tuple data if corner is a point object
@@ -57,7 +54,7 @@ def get_tuple(corner):
         return corner.x, corner.y
 
 
-# DEBUG METHODS_________________________________________________________________________________________________________
+# DEBUG METHOD
 
 # returns Bézier curves from the image path as an array of strings
 # best for graphing
@@ -83,56 +80,40 @@ def get_latex(path):
     return latex
 
 
-# returns start, corner(s), and endpoints as an array of strings
-# best for reading
-def get_points(path):
-    point_strings = []
-    for curve in path:
-        start = curve.start_point
-        for segment in curve:
-            point_strings.append("start_point = {} {}".format(start, segment))
-            start = segment.end_point
-    return point_strings
-
-
 if __name__ == "__main__":
 
-    # TEST DATA ________________________________________________________________________________________________________
+    # TEST DATA 
     # large square filled (16x16)
-    image1 = np.zeros((32, 32), np.uint32)
-    image1[8:32 - 8, 8:32 - 8] = 1
+    array1 = np.zeros((32, 32), np.uint32)
+    array1[8:32 - 8, 8:32 - 8] = 1
     # rhombus
-    image2 = np.matrix(
+    array2 = np.matrix(
         [[0, 0, 0, 1, 0, 0, 0], [0, 0, 1, 0, 1, 0, 0], [0, 1, 0, 0, 0, 1, 0], [1, 0, 0, 0, 0, 0, 1],
          [0, 1, 0, 0, 0, 1, 0],
          [0, 0, 1, 0, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0]])
     # square not filled (7x7)
-    image3 = np.matrix(
+    array3 = np.matrix(
         [[1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1],
          [1, 0, 0, 0, 0, 0, 1],
          [1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1]])
     # square filled (7x7)
-    image4 = np.matrix(
+    array4 = np.matrix(
         [[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]])
-    image_file_path = "./testimages/car.png"
-    # __________________________________________________________________________________________________________________
+    car_image_file_path = "./testimages/car.png"
+    car_image_file_path_gray = "./testimages/carg.png"
+    car_image_file_path_black = "./testimages/carb.png"
 
-    # TEST METHODS _____________________________________________________________________________________________________
+    # TEST METHODS
     # get "svg"
     # change test image here
     # image_path = get_trace(image1)
-    image_path = get_path_from_image(image_file_path)
+    contrast = 128
+    image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(car_image_file_path), car_image_file_path_gray), contrast, car_image_file_path_black)))
 
-    # print points on each curve
-    # points = get_points(image_path)
-    # for point in points:
-    #     print(point)
-
-    # print equations
+    # send equations to file
     equations = get_latex(image_path)
     with open('equations.txt', 'w') as f:
         for equation in equations:
             f.write('{}\n'.format(equation))
-    # __________________________________________________________________________________________________________________
