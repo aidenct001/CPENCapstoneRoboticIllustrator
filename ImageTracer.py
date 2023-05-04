@@ -30,7 +30,7 @@ def maximize_contrast(image, contrast_amount=128, image_file_path_black=None):
     temp = image.point(lambda x: 0 if x < contrast_amount else 255)
     if image_file_path_black is not None: 
         temp.save(image_file_path_black)
-    # os check windows needs 255 and linux needs 1 for their respective potrace implementations
+    # os check windows needs 255 and linux needs 1 for their respective potrace implementations. change after ui dev
     return image.point(lambda x: 0 if x < contrast_amount else (lambda osname: 255 if osname == "nt" else 1)(os.name))
 
 
@@ -42,11 +42,11 @@ def get_array(image):
 # returns a path from a bitmap data
 def get_trace(array):
     bmp = potrace.Bitmap(array)
-    path = bmp.trace()
-    return path
+    return bmp.trace()
 
 
 # returns tuple data if corner is a point object
+# remove when not needed
 def get_tuple(corner):
     if isinstance(corner, tuple):
         return corner
@@ -63,20 +63,20 @@ def get_latex(path):
     for curve in path:
         start = curve.start_point
         for segment in curve:
-            x0, y0 = get_tuple(start)
+            x0, y0 = get_tuple(start) # remove once get tuple not needed
             if segment.is_corner:
-                x1, y1 = get_tuple(segment.c)
-                x2, y2 = get_tuple(segment.end_point)
+                x1, y1 = get_tuple(segment.c) # remove once get tuple not needed
+                x2, y2 = get_tuple(segment.end_point) # remove once get tuple not needed
                 latex.append('((1-t){}+t{},(1-t){}+t{})'.format(x0, x1, y0, y1))
                 latex.append('((1-t){}+t{},(1-t){}+t{})'.format(x1, x2, y1, y2))
             else:
-                x1, y1 = get_tuple(segment.c1)
-                x2, y2 = get_tuple(segment.c2)
-                x3, y3 = get_tuple(segment.end_point)
+                x1, y1 = get_tuple(segment.c1) # remove once get tuple not needed
+                x2, y2 = get_tuple(segment.c2) # remove once get tuple not needed
+                x3, y3 = get_tuple(segment.end_point) # remove once get tuple not needed
                 latex.append('((1-t)((1-t)((1-t){}+t{})+t((1-t){}+t{}))+t((1-t)((1-t){}+t{})+t((1-t){}+t{})),\
                 (1-t)((1-t)((1-t){}+t{})+t((1-t){}+t{}))+t((1-t)((1-t){}+t{})+t((1-t){}+t{})))'.format
                              (x0, x1, x1, x2, x1, x2, x2, x3, y0, y1, y1, y2, y1, y2, y2, y3))
-            start = get_tuple(segment.end_point)
+            start = get_tuple(segment.end_point) # remove once get tuple not needed
     return latex
 
 
@@ -104,16 +104,19 @@ if __name__ == "__main__":
     car_image_file_path = "./testimages/car.png"
     car_image_file_path_gray = "./testimages/carg.png"
     car_image_file_path_black = "./testimages/carb.png"
-
+    face_image_file_path = "./testimages/face.JPG"
+    face_image_file_path_gray = "./testimages/faceg.png"
+    face_image_file_path_black = "./testimages/faceb.png"
     # TEST METHODS
     # get "svg"
     # change test image here
     # image_path = get_trace(image1)
     contrast = 128
-    image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(car_image_file_path), car_image_file_path_gray), contrast, car_image_file_path_black)))
-
+    car_image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(car_image_file_path), car_image_file_path_gray), contrast, car_image_file_path_black)))
+    # too slow on windows
+    # face_image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(face_image_file_path), face_image_file_path_gray), contrast, face_image_file_path_black)))
     # send equations to file
-    equations = get_latex(image_path)
-    with open('equations.txt', 'w') as f:
+    equations = get_latex(car_image_path)
+    with open('./testimages/equations.txt', 'w') as f:
         for equation in equations:
             f.write('{}\n'.format(equation))

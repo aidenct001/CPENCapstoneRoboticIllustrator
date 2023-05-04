@@ -1,3 +1,3 @@
 import tkinter as tk
 import ImageTracer
-import RobotControl
+from RobotControl import robot_control
