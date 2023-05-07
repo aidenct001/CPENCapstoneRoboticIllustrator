@@ -1,14 +1,14 @@
 import ImageTracer # remove once get tuple not needed
 # import RPi.GPIO as GPIO # leave commented out unless on RPi
 import threading
-import time
+import time # maybe not needed | for testing currently
 
 #constants
 PEN_IS_UP = 0
 PEN_IS_DOWN = 1
 
 class robot_control:
-    def __init__(self, path):
+    def __init__(self, path=None):
         self._current_x_pos = 0
         self._current_y_pos = 0
         self._path = path
@@ -17,15 +17,23 @@ class robot_control:
         self._thread = threading.Thread(target=self._draw_image)
         self._gpio_setup()
 
-        
+
+    # starts the robot
     def start_drawing(self):
         self._thread.start()
 
 
+    # interupts the drawing with a clean exit
     def stop_drawing(self):
         self._event.set()
 
 
+    # loads a new path object
+    def load_path(self, path):
+        self._path = path
+
+
+    # sets gpio default values
     def _gpio_setup(self):
         #setup gpio
         return
@@ -34,7 +42,8 @@ class robot_control:
     # draws every curve in an image
     def _draw_image(self):
         for curve in self._path:
-            self._draw_curve(curve)
+            if not self._event.is_set():
+                self._draw_curve(curve)
 
 
     # draws a single curve
@@ -57,7 +66,7 @@ class robot_control:
                 x2, y2 = ImageTracer.get_tuple(segment.c2) # remove once get tuple not needed
                 x3, y3 = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
                 self._pen_down()
-                for t in range(1,11): # possible index oob, test later
+                for t in range(1,11):
                     t/=10
                     if not self._event.is_set():
                         self._go_to_position(self._get_x_position(t, x0, x1, x2, x3), self._get_y_position(t, y0, y1, y2, y3))
@@ -89,32 +98,18 @@ class robot_control:
 
 
     # returns x position on a segment given points from the equation and time 0 <= t <= 1
-    # corner segments are broken into 2 parts
-    # x0, x1 and
-    # x1, x2
-    # if working on the x1, x2 part use those as parameters for x0, x1 respectively
-    def _get_x_position(self, t, x0, x1, x2=-1, x3=-1):
+    def _get_x_position(self, t, x0, x1, x2, x3):
         if t < 0 or t > 1:
             raise ValueError("t value not between 0 and 1")
-        if(x2==-1 and x3==-1):
-            return (1 - t) * x0 + t * x1
-        else:
-            return (1 - t) * ((1 - t) * ((1 - t) * x0 + t * x1) + t * ((1 - t) * x1 + t * x2)) + t * (
+        return (1 - t) * ((1 - t) * ((1 - t) * x0 + t * x1) + t * ((1 - t) * x1 + t * x2)) + t * (
                     (1 - t) * ((1 - t) * x1 + t * x2) + t * ((1 - t) * x2 + t * x3))
 
 
     # returns y position on a segment given points from the equation and time 0 <= t <= 1
-    # corner segments are broken into 2 parts
-    # y0, y1 and
-    # y1, y2
-    # if working on the y1, y2 part use those as parameters for y0, y1 respectively
-    def _get_y_position(self, t, y0, y1, y2=-1, y3=-1):
+    def _get_y_position(self, t, y0, y1, y2, y3):
         if t < 0 or t > 1:
             raise ValueError("t value not between 0 and 1")
-        if(y2==-1 and y3==-1):
-            return (1 - t) * y0 + t * y1
-        else:
-            return (1 - t) * ((1 - t) * ((1 - t) * y0 + t * y1) + t * ((1 - t) * y1 + t * y2)) + t * (
+        return (1 - t) * ((1 - t) * ((1 - t) * y0 + t * y1) + t * ((1 - t) * y1 + t * y2)) + t * (
                     (1 - t) * ((1 - t) * y1 + t * y2) + t * ((1 - t) * y2 + t * y3))
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import potrace
-import os
+import os # rm when not needed
 
 
 # variable terminology
@@ -30,7 +30,7 @@ def maximize_contrast(image, contrast_amount=128, image_file_path_black=None):
     temp = image.point(lambda x: 0 if x < contrast_amount else 255)
     if image_file_path_black is not None: 
         temp.save(image_file_path_black)
-    # os check windows needs 255 and linux needs 1 for their respective potrace implementations. change after ui dev
+    # os check windows needs 255 and linux needs 1 for their respective potrace implementations. change after ui dev | rm when not needed
     return image.point(lambda x: 0 if x < contrast_amount else (lambda osname: 255 if osname == "nt" else 1)(os.name))
 
 
@@ -55,7 +55,6 @@ def get_tuple(corner):
 
 
 # DEBUG METHOD
-
 # returns Bézier curves from the image path as an array of strings
 # best for graphing
 def get_latex(path):
