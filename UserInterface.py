@@ -1,13 +1,12 @@
 import tkinter as tk
 import ImageTracer
 from RobotControl import robot_control
-import numpy as np # testing only
+import numpy as np # testing only rm later
 
 
 # Opens file browser to allow user to select file.
 # Loads selected file into robot control
 def select_image():
-    # square filled (7x7)
     array1 = np.zeros((32, 32), np.uint32)
     array1[8:32 - 8, 8:32 - 8] = 1
     image_path = ImageTracer.get_trace(array1)

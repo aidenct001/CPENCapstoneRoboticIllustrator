@@ -51,48 +51,57 @@ class robot_control:
         start = curve.start_point
         x0, y0 = ImageTracer.get_tuple(start) # remove once get tuple not needed
         self._go_to_position(x0, y0) # go to start of curve
+        self._pen_down()
         for segment in curve:
             if segment.is_corner:
                 x1, y1 = ImageTracer.get_tuple(segment.c) # remove once get tuple not needed
                 x2, y2 = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
-                self._pen_down()
                 if not self._event.is_set():
                     self._go_to_position(x1, y1)
                 if not self._event.is_set():
                     self._go_to_position(x2, y2)
-                self._pen_up()
             else:
                 x1, y1 = ImageTracer.get_tuple(segment.c1) # remove once get tuple not needed
                 x2, y2 = ImageTracer.get_tuple(segment.c2) # remove once get tuple not needed
                 x3, y3 = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
-                self._pen_down()
                 for t in range(1,11):
                     t/=10
                     if not self._event.is_set():
                         self._go_to_position(self._get_x_position(t, x0, x1, x2, x3), self._get_y_position(t, y0, y1, y2, y3))
-                self._pen_up()
             start = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
-        
+        self._pen_up()
         self._reset_pen()
-    
 
+
+    # resets pen to 0,0 from current postion
     def _reset_pen(self):
         self._go_to_position(0, 0)
     
 
+    # moves pen down if not already down
     def _pen_down(self):
-        print("pen down")
+        if(self._current_pen_pos == PEN_IS_DOWN):
+            return
+        # motor
+        self._current_pen_pos = PEN_IS_DOWN
+        print("pen down") # rm later
 
 
+    # moves pen up if not already up
     def _pen_up(self):
+        if(self._current_pen_pos == PEN_IS_UP):
+            return
+        # motor
+        self._current_pen_pos = PEN_IS_UP
         print("pen up")
 
 
     # moves robot to new position from current position
     # returns new position to update current_pos
     def _go_to_position(self, x_new, y_new):
-        print("moving from x={} y={} to x={} y={}".format(self._current_x_pos, self._current_y_pos, x_new, y_new)) # here until motor control exists
-        time.sleep(2) # time simulation
+        print("moving from x={} y={} to x={} y={}".format(self._current_x_pos, self._current_y_pos, x_new, y_new)) # here until motor control
+        time.sleep(2) # time simulation for testing
+        # motor
         self._current_x_pos = x_new
         self._current_y_pos = y_new
 
