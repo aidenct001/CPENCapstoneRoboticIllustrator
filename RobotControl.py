@@ -1,47 +1,91 @@
 import ImageTracer # remove once get tuple not needed
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO # leave commented out unless on RPi
+import threading
+import time
+
+#constants
+PEN_IS_UP = 0
+PEN_IS_DOWN = 1
 
 class robot_control:
-    def __init__(self):
-        self.current_x_pos = 0
-        self.current_y_pos = 0
-        # currently sets to 0 no matter what position motors are in. Maybe include a reset that is not based on a position but idk how. If the code exits well I can move back based on current position but that is not a good solution
-        self.gpio_setup()
+    def __init__(self, path):
+        self._current_x_pos = 0
+        self._current_y_pos = 0
+        self._path = path
+        self._current_pen_pos = PEN_IS_UP
+        self._event = threading.Event()
+        self._thread = threading.Thread(target=self._draw_image)
+        self._gpio_setup()
+
+        
+    def start_drawing(self):
+        self._thread.start()
 
 
-    def gpio_setup(self):
+    def stop_drawing(self):
+        self._event.set()
+
+
+    def _gpio_setup(self):
         #setup gpio
         return
 
 
     # draws every curve in an image
-    def draw_image(self, path):
-        for curve in path:
-            self.draw_curve(curve)
+    def _draw_image(self):
+        for curve in self._path:
+            self._draw_curve(curve)
 
 
     # draws a single curve
-    def draw_curve(self, curve):
+    def _draw_curve(self, curve):
         start = curve.start_point
+        x0, y0 = ImageTracer.get_tuple(start) # remove once get tuple not needed
+        self._go_to_position(x0, y0) # go to start of curve
         for segment in curve:
-            x0, y0 = ImageTracer.get_tuple(start) # remove once get tuple not needed
             if segment.is_corner:
                 x1, y1 = ImageTracer.get_tuple(segment.c) # remove once get tuple not needed
                 x2, y2 = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
-                # draw segment
+                self._pen_down()
+                if not self._event.is_set():
+                    self._go_to_position(x1, y1)
+                if not self._event.is_set():
+                    self._go_to_position(x2, y2)
+                self._pen_up()
             else:
                 x1, y1 = ImageTracer.get_tuple(segment.c1) # remove once get tuple not needed
                 x2, y2 = ImageTracer.get_tuple(segment.c2) # remove once get tuple not needed
                 x3, y3 = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
-                # draw segment
+                self._pen_down()
+                for t in range(1,11): # possible index oob, test later
+                    t/=10
+                    if not self._event.is_set():
+                        self._go_to_position(self._get_x_position(t, x0, x1, x2, x3), self._get_y_position(t, y0, y1, y2, y3))
+                self._pen_up()
             start = ImageTracer.get_tuple(segment.end_point) # remove once get tuple not needed
+        
+        self._reset_pen()
+    
+
+    def _reset_pen(self):
+        self._go_to_position(0, 0)
+    
+
+    def _pen_down(self):
+        print("pen down")
+
+
+    def _pen_up(self):
+        print("pen up")
 
 
     # moves robot to new position from current position
     # returns new position to update current_pos
-    def go_to_position(self, x_cur, y_cur, x_new, y_new):
-        # move position
-        return x_new, y_new
+    def _go_to_position(self, x_new, y_new):
+        print("moving from x={} y={} to x={} y={}".format(self._current_x_pos, self._current_y_pos, x_new, y_new)) # here until motor control exists
+        time.sleep(2) # time simulation
+        self._current_x_pos = x_new
+        self._current_y_pos = y_new
 
 
     # returns x position on a segment given points from the equation and time 0 <= t <= 1
@@ -49,7 +93,7 @@ class robot_control:
     # x0, x1 and
     # x1, x2
     # if working on the x1, x2 part use those as parameters for x0, x1 respectively
-    def get_x_position(self, t, x0, x1, x2=-1, x3=-1):
+    def _get_x_position(self, t, x0, x1, x2=-1, x3=-1):
         if t < 0 or t > 1:
             raise ValueError("t value not between 0 and 1")
         if(x2==-1 and x3==-1):
@@ -64,7 +108,7 @@ class robot_control:
     # y0, y1 and
     # y1, y2
     # if working on the y1, y2 part use those as parameters for y0, y1 respectively
-    def get_y_position(self, t, y0, y1, y2=-1, y3=-1):
+    def _get_y_position(self, t, y0, y1, y2=-1, y3=-1):
         if t < 0 or t > 1:
             raise ValueError("t value not between 0 and 1")
         if(y2==-1 and y3==-1):
@@ -76,14 +120,5 @@ class robot_control:
 
     # returns velocity between 2 x or y values
     # intended for velocity in 1 axis
-    def get_velocity(self, p0, p1):
+    def _get_velocity(self, p0, p1):
         return p1 - p0
-
-
-    # test function for testing gui
-    def draw_image_test(self, path):
-        print("done")
-
-
-if __name__ == "__main__":
-    print("debug todo")
