@@ -43,6 +43,11 @@ class RobotControl:
     # checks if path has been loaded by user
     def is_loaded(self):
         return False if self._path == None else True
+    
+
+    # checks if path has been loaded by user
+    def is_running(self):
+        return self._running_event.is_set
 
 
     # sets gpio default values

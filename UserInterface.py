@@ -17,6 +17,9 @@ def select_image_test():
 # Opens file browser to allow user to select file.
 # Loads selected file into robot control
 def select_image_from_file():
+    if(robot.is_running()):
+        print("must be stoppped to change drawing") # change later for better gui message
+        return
     image_file_path = filedialog.askopenfilename()
     if image_file_path == "":
         return
