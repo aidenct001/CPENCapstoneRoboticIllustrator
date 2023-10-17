@@ -31,10 +31,10 @@ def select_image_from_file():
 
 # Starts the robot
 def start_drawing():
-    if robot.is_loaded :
-        try:
+    if robot.is_loaded():
+        if not robot.is_running():
             robot.start_drawing()
-        except RunningException:
+        else:
             print("already drawing") # change later for better gui message
             return
     else:

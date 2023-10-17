@@ -21,12 +21,10 @@ class RobotControl:
 
     # starts the robot
     def start_drawing(self):
-        if self._running_event.is_set():
-            raise RunningException() # already started once
         self._running_event.set()
         self._thread = threading.Thread(target=self._draw_image)
         if(self._stop_event.is_set):
-            self._stop_event.clear 
+            self._stop_event.clear() 
         self._thread.start()
 
 
@@ -47,7 +45,7 @@ class RobotControl:
 
     # checks if path has been loaded by user
     def is_running(self):
-        return self._running_event.is_set
+        return self._running_event.is_set()
 
 
     # sets gpio default values
