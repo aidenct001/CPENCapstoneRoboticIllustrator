@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import filedialog
 import ImageTracer as it
 from RobotControl import RobotControl
-from RobotControl import RunningException # remove
 import numpy as np # testing only rm later
 
 
