@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
+from tkinter import font
+from PIL import ImageTk
 import ImageTracer as it
 from RobotControl import RobotControl
 import numpy as np # testing only rm later
@@ -8,8 +11,16 @@ import numpy as np # testing only rm later
 # test method
 def select_image_test():
     array1 = np.zeros((32, 32), np.uint32)
-    array1[8:32 - 8, 8:32 - 8] = 1
+    array1[8:32 - 8, 8:32 - 8] = 255
     image_path = it.get_trace(array1)
+    with open('./testimages/array.txt', 'w') as f:
+        np.set_printoptions(threshold=np.inf)
+        arraystring = np.array_str(array1)
+        f.write(arraystring)
+    equations = it.get_latex(image_path)
+    with open('./testimages/equations.txt', 'w') as f:
+        for equation in equations:
+            f.write('{}\n'.format(equation))
     robot.load_path(image_path)
 
 
@@ -17,15 +28,21 @@ def select_image_test():
 # Loads selected file into robot control
 def select_image_from_file():
     if(robot.is_running()):
-        print("must be stoppped to change drawing") # change later for better gui message
+        messagebox.showerror("Robotic Illustrator", "Robot must be stoppped to change drawing")
         return
     image_file_path = filedialog.askopenfilename()
     if image_file_path == "":
         return
+    image = it.get_image(image_file_path)
     contrast = 128
-    image_path = it.get_trace(it.get_array(it.maximize_contrast(it.grayscale(it.get_image(image_file_path)), contrast)))
+    image_path = it.get_trace(it.get_array(it.maximize_contrast(it.grayscale(image), contrast)))
     robot.load_path(image_path)
-    print("loaded image") # change later for better gui message
+    # photo = ImageTk.PhotoImage(image.resize((200, 200), resample = 1))
+    # # label.config(image = photo)
+    # label = tk.Label(window, image = photo)
+    # label.pack()
+    messagebox.showinfo("Robotic Illustrator", "Image successfully loaded")
+    
 
 
 # Starts the robot
@@ -34,10 +51,10 @@ def start_drawing():
         if not robot.is_running():
             robot.start_drawing()
         else:
-            print("already drawing") # change later for better gui message
+            messagebox.showerror("Robotic Illustrator", "Robot is already drawing")
             return
     else:
-        print("not loaded") # change later for better gui message
+        messagebox.showerror("Robotic Illustrator", "Image file must be loaded to start drawing")
 
 
 # Stops the robot
@@ -46,12 +63,25 @@ def stop_drawing():
 
 if __name__ == "__main__":
     robot = RobotControl()
-    root = tk.Tk()
-    button1 = tk.Button(root, text="Select Image", command=select_image_from_file)
-    button1.pack()
-    button2 = tk.Button(root, text="Start Drawing", command=start_drawing)
-    button2.pack()
-    button3 = tk.Button(root, text="Stop Drawing", command=stop_drawing)
-    button3.pack()
-
-    root.mainloop()
+    window = tk.Tk()
+    window.configure(bg = "#333333")
+    button_font = font.Font(size = 25)
+    header_font = font.Font(size = 40, weight = "bold")
+    header = tk.Label(window, text = "Robotic Illustrator", bg = "#222222", fg = "white", width = 1000, height = 3)
+    header.pack(side = "top")
+    header["font"] = header_font
+    button1 = tk.Button(window, text = "Select Image", command = select_image_from_file, bg = "blue", fg = "white", width = 11)
+    button1.pack(side = "top", padx = 10, pady = 10)
+    button1["font"] = button_font
+    button2 = tk.Button(window, text = "Start Drawing", command = start_drawing, bg = "green", width = 11)
+    button2.pack(side = "left", padx = 10, pady = 10)
+    button2["font"] = button_font
+    button3 = tk.Button(window, text = "Stop Drawing", command = stop_drawing, bg = "red", width = 11)
+    button3.pack(side = "right", padx = 10, pady = 10)
+    button3["font"] = button_font
+    # photo = ImageTk.PhotoImage(it.get_image("./testimages/car.png").resize((200, 200), resample = 1))
+    # label = tk.Label(window, image = photo)
+    # label.pack()
+    window.title("Robotic Illustrator")
+    window.geometry("600x400")
+    window.mainloop()

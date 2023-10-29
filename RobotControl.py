@@ -22,7 +22,7 @@ class RobotControl:
     # starts the robot
     def start_drawing(self):
         self._running_event.set()
-        self._thread = threading.Thread(target=self._draw_image)
+        self._thread = threading.Thread(target = self._draw_image)
         if(self._stop_event.is_set):
             self._stop_event.clear() 
         self._thread.start()
