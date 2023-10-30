@@ -5,44 +5,33 @@ import os # rm when not needed
 
 
 # variable terminology
-# image: image object containing png or jpeg
+# image = image object containing png or jpeg
 # array = bitmap of pixels from an image
 # path = all svg data from an image
 # curve = single full shape from a path
 # segment = single line from a curve
 
 
-# returns an image object from an image file path
-def get_image(image_file_path):
-    return Image.open(image_file_path)
-
-
 # returns a grayscale image
 def grayscale(image, image_file_path_gray=None):
-    temp = image.convert('L')
+    temp_image = image.convert('L')
     if image_file_path_gray is not None: 
-        temp.save(image_file_path_gray)
-    return temp
+        temp_image.save(image_file_path_gray)
+    return temp_image
 
 
 # returns a black and white image
 def maximize_contrast(image, contrast_amount=128, image_file_path_black=None):
-    temp = image.point(lambda x: 0 if x < contrast_amount else 255)
+    temp_image = image.point(lambda x: 0 if x < contrast_amount else 255)
     if image_file_path_black is not None: 
-        temp.save(image_file_path_black)
+        temp_image.save(image_file_path_black)
     # os check windows needs 255 and linux needs 1 for their respective potrace implementations. change after ui dev | rm when not needed
     return image.point(lambda x: 0 if x < contrast_amount else (lambda osname: 255 if osname == "nt" else 1)(os.name))
 
 
-# returns a numpy array from an image object
-def get_array(image):
-    return np.array(image)
-
-
 # returns a path from a bitmap data
 def get_trace(array):
-    bmp = potrace.Bitmap(array)
-    return bmp.trace()
+    return potrace.Bitmap(array).trace()
 
 
 # returns tuple data if corner is a point object
@@ -111,7 +100,7 @@ if __name__ == "__main__":
     # change test image here
     # image_path = get_trace(image1)
     contrast = 128
-    car_image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(car_image_file_path), car_image_file_path_gray), contrast, car_image_file_path_black)))
+    car_image_path = get_trace(np.array(maximize_contrast(grayscale(Image.open(car_image_file_path), car_image_file_path_gray), contrast, car_image_file_path_black)))
     # too slow on windows
     # face_image_path = get_trace(get_array(maximize_contrast(grayscale(get_image(face_image_file_path), face_image_file_path_gray), contrast, face_image_file_path_black)))
     # send equations to file

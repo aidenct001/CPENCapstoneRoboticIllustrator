@@ -2,21 +2,24 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import font
+from PIL import Image
 from PIL import ImageTk
+import numpy as np
 import ImageTracer as it
 from RobotControl import RobotControl
-import numpy as np # testing only rm later
 
 
 # test method
 def select_image_test():
-    array1 = np.zeros((32, 32), np.uint32)
-    array1[8:32 - 8, 8:32 - 8] = 255
-    image_path = it.get_trace(array1)
+    array_test = np.zeros((32, 32), np.uint32)
+    array_test[8:32 - 8, 8:32 - 8] = 255
+    image_path = it.get_trace(array_test)
+    # visual of array
     with open('./testimages/array.txt', 'w') as f:
         np.set_printoptions(threshold=np.inf)
-        arraystring = np.array_str(array1)
+        arraystring = np.array_str(array_test)
         f.write(arraystring)
+    # equations
     equations = it.get_latex(image_path)
     with open('./testimages/equations.txt', 'w') as f:
         for equation in equations:
@@ -32,10 +35,11 @@ def select_image_from_file():
         return
     image_file_path = filedialog.askopenfilename()
     if image_file_path == "":
+        messagebox.showerror("Robotic Illustrator", "No file selected")
         return
-    image = it.get_image(image_file_path)
+    image = Image.open(image_file_path)
     contrast = 128
-    image_path = it.get_trace(it.get_array(it.maximize_contrast(it.grayscale(image), contrast)))
+    image_path = it.get_trace(np.array(it.maximize_contrast(it.grayscale(image), contrast)))
     robot.load_path(image_path)
     # photo = ImageTk.PhotoImage(image.resize((200, 200), resample = 1))
     # # label.config(image = photo)
@@ -64,24 +68,32 @@ def stop_drawing():
 if __name__ == "__main__":
     robot = RobotControl()
     window = tk.Tk()
-    window.configure(bg = "#333333")
+
     button_font = font.Font(size = 25)
     header_font = font.Font(size = 40, weight = "bold")
+
     header = tk.Label(window, text = "Robotic Illustrator", bg = "#222222", fg = "white", width = 1000, height = 3)
     header.pack(side = "top")
     header["font"] = header_font
-    button1 = tk.Button(window, text = "Select Image", command = select_image_from_file, bg = "blue", fg = "white", width = 11)
-    button1.pack(side = "top", padx = 10, pady = 10)
-    button1["font"] = button_font
-    button2 = tk.Button(window, text = "Start Drawing", command = start_drawing, bg = "green", width = 11)
-    button2.pack(side = "left", padx = 10, pady = 10)
-    button2["font"] = button_font
-    button3 = tk.Button(window, text = "Stop Drawing", command = stop_drawing, bg = "red", width = 11)
-    button3.pack(side = "right", padx = 10, pady = 10)
-    button3["font"] = button_font
+
+    button_select = tk.Button(window, text = "Select Image", command = select_image_from_file, bg = "blue", fg = "white", width = 11)
+    button_select.pack(side = "top", padx = 10, pady = 10)
+    button_select["font"] = button_font
+
+    button_start = tk.Button(window, text = "Start Drawing", command = start_drawing, bg = "green", width = 11)
+    button_start.pack(side = "left", padx = 10, pady = 10)
+    button_start["font"] = button_font
+
+    button_stop = tk.Button(window, text = "Stop Drawing", command = stop_drawing, bg = "red", width = 11)
+    button_stop.pack(side = "right", padx = 10, pady = 10)
+    button_stop["font"] = button_font
+
     # photo = ImageTk.PhotoImage(it.get_image("./testimages/car.png").resize((200, 200), resample = 1))
     # label = tk.Label(window, image = photo)
     # label.pack()
+
+    window.configure(bg = "#333333")
     window.title("Robotic Illustrator")
     window.geometry("600x400")
+    
     window.mainloop()
