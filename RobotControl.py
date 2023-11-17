@@ -15,6 +15,17 @@ class RobotControl:
         self._current_y_pos = 0
         self._path = path
         self._current_pen_pos = PEN_IS_UP
+        self._steps_per_rev = 200  # (360/1.8)
+        self._delay = 0.005  # 1/200
+        # x-axis step and direction pins on rpi
+        self._STEP1 = 15
+        self._DIR1 = 14
+        # y-axis step and direction pins on rpi
+        self._STEP2 = 23
+        self._DIR2 = 24
+        # z-axis step and direction pins on rpi
+        self._STEP3 = 5
+        self._DIR3 = 6
         self._stop_event = threading.Event()
         self._running_event = threading.Event()
         self._thread = None
@@ -46,37 +57,23 @@ class RobotControl:
 
     # sets gpio default values
     def _gpio_setup(self):
-        # x-axis step and direction pins on rpi
-        STEP1 = 15
-        DIR1 = 14
-        # y-axis step and direction pins on rpi
-        STEP2 = 23
-        DIR2 = 24
-        # z-axis step and direction pins on rpi
-        STEP3 = 5
-        DIR3 = 6
-
-        steps_per_rev = 200  # (360/1.8)
-        delay = 0.005  # 1/200
-
         # Setup for x-axis motor
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(DIR1, GPIO.OUT)
-        GPIO.setup(STEP1, GPIO.OUT)
-        GPIO.output(DIR1, 0)  # Default direction: clockwise
+        GPIO.setup(self._DIR1, GPIO.OUT)
+        GPIO.setup(self._STEP1, GPIO.OUT)
+        GPIO.output(self._DIR1, 0)  # Default direction: clockwise
 
         # Setup for y-axis motor
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(DIR2, GPIO.OUT)
-        GPIO.setup(STEP2, GPIO.OUT)
-        GPIO.output(DIR2, 0)  # Default direction: clockwise
+        GPIO.setup(self._DIR2, GPIO.OUT)
+        GPIO.setup(self._STEP2, GPIO.OUT)
+        GPIO.output(self._DIR2, 0)  # Default direction: clockwise
 
         # Setup for z-axis motor
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(DIR3, GPIO.OUT)
-        GPIO.setup(STEP3, GPIO.OUT)
-        GPIO.output(DIR3, 0)  # Default direction: clockwise
-        return
+        GPIO.setup(self._DIR3, GPIO.OUT)
+        GPIO.setup(self._STEP3, GPIO.OUT)
+        GPIO.output(self._DIR3, 0)  # Default direction: clockwise
 
     # draws every curve in an image
     def _draw_image(self):
@@ -103,17 +100,18 @@ class RobotControl:
                 x2, y2 = ImageTracer.get_tuple(segment.c2)  # remove once get tuple not needed
                 x3, y3 = ImageTracer.get_tuple(segment.end_point)  # remove once get tuple not needed
 
+                # This needs to be in go to position based on where x,y is compared to x cur,y cur
                 # Setting motor direction for x-axis motor
-                if x1 > x3:
-                    GPIO.output(DIR1, 0)
-                elif x3 > x1:
-                    GPIO.output(DIR1, 1)
+                # if x1 > x3:
+                #     GPIO.output(self._DIR1, 0)
+                # elif x3 > x1:
+                #     GPIO.output(self._DIR1, 1)
 
                 # Setting motor direction for y-axis motor
-                if y1 > y3:
-                    GPIO.output(DIR2, 0)
-                elif y3 > y1:
-                    GPIO.output(DIR2, 1)
+                # if y1 > y3:
+                #     GPIO.output(self._DIR2, 0)
+                # elif y3 > y1:
+                #     GPIO.output(self._DIR2, 1)
 
                 for t in range(1, 11):
                     t /= 10
@@ -136,12 +134,12 @@ class RobotControl:
             return
 
         self._current_pen_pos = PEN_IS_DOWN
-        GPIO.output(DIR3, 0)
+        GPIO.output(self._DIR3, 0)
         for steps in 5:
-            GPIO.output(STEP3, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP3, GPIO.LOW)
-            sleep(delay)
+            GPIO.output(self._STEP3, GPIO.HIGH)
+            time.sleep(self._delay)
+            GPIO.output(self._STEP3, GPIO.LOW)
+            time.sleep(self._delay)
         # motor
         self._current_pen_pos = PEN_IS_DOWN
         print("pen down")  # rm later
@@ -151,12 +149,12 @@ class RobotControl:
         if self._current_pen_pos == PEN_IS_UP:
             return
 
-        GPIO.output(DIR3, 1)
+        GPIO.output(self._DIR3, 1)
         for steps in 5:
-            GPIO.output(STEP3, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP3, GPIO.LOW)
-            sleep(delay)
+            GPIO.output(self._STEP3, GPIO.HIGH)
+            time.sleep(self._delay)
+            GPIO.output(self._STEP3, GPIO.LOW)
+            time.sleep(self._delay)
         # motor
         self._current_pen_pos = PEN_IS_UP
         print("pen up")  # rm later
@@ -164,7 +162,7 @@ class RobotControl:
     # moves robot to new position from current position
     # updates current_pos to new position
     def _go_to_position(self, x_new, y_new):
-        print("moving from x={} y={} to x={} y={}".format(self._current_x_pos, self._current_y_pos, x_new, y_new))
+        print("moving from x={} y={} to x={} y={}".format(self._current_x_pos, self._current_y_pos, x_new, y_new)) # rm later
 
         # Linear Distance per step = (Pi * D) / (N * 360)
         # where D is the pitch of the lead screw (mm)
@@ -175,20 +173,18 @@ class RobotControl:
         CoordinateDist = math.sqrt((x_new - self._current_x_pos)**2 + ((y_new - self._current_y_pos)**2))
 
         # Number of steps for each axis motor to perform
-        NumOfSteps = CoordinateDist / LinDistPerSteps
+        NumOfSteps = CoordinateDist / LinDistPerStep
 
         for step in NumOfSteps:
-            GPIO.output(STEP1, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP1, GPIO.LOW)
-            sleep(delay)
+            GPIO.output(self._STEP1, GPIO.HIGH)
+            time.sleep(self._delay)
+            GPIO.output(self._STEP1, GPIO.LOW)
+            time.sleep(self._delay)
 
-            GPIO.output(STEP2, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP2, GPIO.LOW)
-            sleep(delay)
-
-        time.sleep(2)  # time simulation for testing
+            GPIO.output(self._STEP2, GPIO.HIGH)
+            time.sleep(self._delay)
+            GPIO.output(self._STEP2, GPIO.LOW)
+            time.sleep(self._delay)
         # motor
         self._current_x_pos = x_new
         self._current_y_pos = y_new

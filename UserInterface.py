@@ -46,7 +46,6 @@ def select_image_from_file():
     # label = tk.Label(window, image = photo)
     # label.pack()
     messagebox.showinfo("Robotic Illustrator", "Image successfully loaded")
-    
 
 
 # Starts the robot
@@ -95,5 +94,5 @@ if __name__ == "__main__":
     window.configure(bg = "#333333")
     window.title("Robotic Illustrator")
     window.geometry("600x400")
-    
+
     window.mainloop()
