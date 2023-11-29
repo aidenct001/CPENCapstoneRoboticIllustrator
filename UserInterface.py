@@ -1,11 +1,10 @@
 import tkinter as tk
+import numpy as np
+import ImageTracer as it
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import font
 from PIL import Image
-from PIL import ImageTk
-import numpy as np
-import ImageTracer as it
 from RobotControl import RobotControl
 
 
@@ -41,10 +40,6 @@ def select_image_from_file():
     contrast = 128
     image_path = it.get_trace(np.array(it.maximize_contrast(it.grayscale(image), contrast)))
     robot.load_path(image_path)
-    # photo = ImageTk.PhotoImage(image.resize((200, 200), resample = 1))
-    # # label.config(image = photo)
-    # label = tk.Label(window, image = photo)
-    # label.pack()
     messagebox.showinfo("Robotic Illustrator", "Image successfully loaded")
 
 
@@ -86,10 +81,6 @@ if __name__ == "__main__":
     button_stop = tk.Button(window, text = "Stop Drawing", command = stop_drawing, bg = "red", width = 11)
     button_stop.pack(side = "right", padx = 10, pady = 10)
     button_stop["font"] = button_font
-
-    # photo = ImageTk.PhotoImage(it.get_image("./testimages/car.png").resize((200, 200), resample = 1))
-    # label = tk.Label(window, image = photo)
-    # label.pack()
 
     window.configure(bg = "#333333")
     window.title("Robotic Illustrator")

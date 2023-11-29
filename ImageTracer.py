@@ -1,7 +1,7 @@
 import numpy as np
-from PIL import Image
 import potrace
-import os # rm when not needed
+import os
+from PIL import Image
 
 
 # variable terminology
@@ -35,7 +35,7 @@ def get_trace(array):
 
 
 # returns tuple data if corner is a point object
-# remove when not needed
+# needed for potracer on windows
 def get_tuple(corner):
     if isinstance(corner, tuple):
         return corner
