@@ -10,5 +10,10 @@ Install libraries
 
     $ pip install numpy
     $ pip install pillow
+    $ pip install tkinter
     $ pip install pypotrace
     $ pip install RPi.GPIO
+
+Alternate libraries (pure python but slower)
+
+    $ pip install potracer 
