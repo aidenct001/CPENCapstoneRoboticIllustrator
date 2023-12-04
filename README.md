@@ -17,3 +17,7 @@ Install libraries
 Alternate libraries (pure python but slower)
 
     $ pip install potracer 
+
+Must run this command for gpiozero
+
+    $ sudo pigpiod

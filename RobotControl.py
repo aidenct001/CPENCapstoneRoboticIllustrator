@@ -1,8 +1,10 @@
 import ImageTracer as it
-import RPi.GPIO as GPIO # leave commented out unless on RPi
+import RPi.GPIO as GPIO
 import threading
 import math
 import time
+from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero import Servo
 
 # Constants
 PEN_IS_UP = 0
@@ -25,9 +27,9 @@ class RobotControl:
         # y-axis step and direction pins on rpi
         self._STEP2 = 17
         self._DIR2 = 23
-        # z-axis step and direction pins on rpi
-        self._STEP3 = 5
-        self._DIR3 = 6
+        # pin for pen servo motor
+        self._factory = PiGPIOFactory()
+        self._servo = Servo(13, pin_factory=self._factory)
         self._stop_event = threading.Event()
         self._running_event = threading.Event()
         self._thread = None
@@ -69,11 +71,6 @@ class RobotControl:
         GPIO.setup(self._DIR2, GPIO.OUT)
         GPIO.setup(self._STEP2, GPIO.OUT)
         GPIO.output(self._DIR2, CW)  # Default direction: clockwise
-        # Setup for z-axis motor
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self._DIR3, GPIO.OUT)
-        GPIO.setup(self._STEP3, GPIO.OUT)
-        GPIO.output(self._DIR3, CW)  # Default direction: clockwise
 
     # draws every curve in an image
     def _draw_image(self):
@@ -99,14 +96,14 @@ class RobotControl:
                 x1, y1 = it.get_tuple(segment.c1)
                 x2, y2 = it.get_tuple(segment.c2)
                 x3, y3 = it.get_tuple(segment.end_point)
-                for t in range(1, 11):
-                    t /= 10
-                    if not self._stop_event.is_set():
-                        self._go_to_position(self._get_x_position(t, x0, x1, x2, x3),
-                                             self._get_y_position(t, y0, y1, y2, y3))
+                # for t in range(1, 11):
+                #     t /= 10
+                if not self._stop_event.is_set(): # no linear approximation
+                    self._go_to_position(self._get_x_position(1, x0, x1, x2, x3),
+                                        self._get_y_position(1, y0, y1, y2, y3))
             start = it.get_tuple(segment.end_point)
         self._pen_up()
-        self._reset_pen()
+        #self._reset_pen()
         self._running_event.clear()
 
     # resets pen to 0,0 from current postion
@@ -118,12 +115,10 @@ class RobotControl:
     def _pen_down(self):
         if self._current_pen_pos == PEN_IS_DOWN:
             return
-        GPIO.output(self._DIR3, CW)
-        for step in range(5):
-            GPIO.output(self._STEP3, GPIO.HIGH)
-            time.sleep(self._delay)
-            GPIO.output(self._STEP3, GPIO.LOW)
-            time.sleep(self._delay)
+        self._servo.mid()
+        time.sleep(1)
+        self._servo.min() 
+        time.sleep(1)
         self._current_pen_pos = PEN_IS_DOWN
         print("pen down")
 
@@ -131,12 +126,10 @@ class RobotControl:
     def _pen_up(self):
         if self._current_pen_pos == PEN_IS_UP:
             return
-        GPIO.output(self._DIR3, CCW)
-        for step in range(5):
-            GPIO.output(self._STEP3, GPIO.HIGH)
-            time.sleep(self._delay)
-            GPIO.output(self._STEP3, GPIO.LOW)
-            time.sleep(self._delay)
+        self._servo.min()
+        time.sleep(1)
+        self._servo.mid() 
+        time.sleep(1)
         self._current_pen_pos = PEN_IS_UP
         print("pen up")
 
